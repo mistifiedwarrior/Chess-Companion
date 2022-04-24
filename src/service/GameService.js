@@ -10,7 +10,6 @@ const GameService = () => ({
     if (values.type === 'HOST') {
       const game = new Game(PlayerService.createPlayer(values.name, values.color), IdGenerator.generate(IdType.game))
       this.games.push(game)
-      console.log(game)
       return [game, game.player1]
     }
     const currentGame = this.findGame(values.roomNo)
@@ -28,6 +27,16 @@ const GameService = () => ({
       throw new BadDataException(ChessError.CHESS600)
     }
     return currentGame
+  },
+  getStatus(gameId) {
+    return this.findGame(gameId)
+  },
+  startGame(gameId, user) {
+    const game = this.findGame(gameId)
+    if (game.player1.playerId !== user.playerId) {
+      throw new BadDataException(ChessError.CHESS602)
+    }
+    return game.start()
   }
 })
 
