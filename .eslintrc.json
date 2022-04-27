@@ -54,7 +54,6 @@
     "id-denylist": 2,
     "id-length": 2,
     "id-match": 2,
-    "implicit-arrow-linebreak": 2,
     "init-declarations": 2,
     "key-spacing": 2,
     "keyword-spacing": 2,

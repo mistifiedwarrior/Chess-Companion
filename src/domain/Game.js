@@ -1,17 +1,17 @@
-const WHITE = "WHITE"
-const BLACK = "BLACK"
-
+import {Chess} from 'chess.js'
 
 class Game {
   player1;
-  player2;
-  gameId;
-  state;
+  player2
+  gameId
+  state = "CREATED"
+  createdAt = new Date()
+  chess
   
-  constructor(player, gameId) {
-    this.player1 = player
+  constructor(playerId, gameId) {
+    this.player1 = playerId
     this.gameId = gameId
-    this.state = "CREATED"
+    this.chess = new Chess()
   }
   
   addPlayer(player) {
@@ -19,14 +19,21 @@ class Game {
     return this
   }
   
-  getPlayer2Color() {
-    return this.player1.color === WHITE ? BLACK : WHITE
-  }
-  
   start() {
     if (this.state === "CREATED")
       this.state = "STARTED"
     return this
+  }
+  
+  static loadGame(loadGame) {
+    const game = new Game()
+    game.gameId = loadGame.gameId
+    game.state = loadGame.state
+    game.player1 = loadGame.player1
+    game.player2 = loadGame.player2
+    game.createdAt = loadGame.createdAt
+    game.board = game.chess.board()
+    return game
   }
 }
 
