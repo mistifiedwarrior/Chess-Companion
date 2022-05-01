@@ -25,14 +25,19 @@ const webSocketController = () => {
   })
   
   wss.on('connection', (ws, req) => {
-    const parameters = url.parse(req.url, true)
-    const {gameId, player} = TokenService.parseToken(parameters.query.token)
-    ws.gameId = gameId
-    ws.playerId = player.playerId
-    addClient(ws)
-    ws.on('message', WebSocketMessageService(broadcast(gameId), ws))
-    ws.on('close', () => ClientService.removeClient(player.playerId))
-    ws.emit('message', JSON.stringify({event: STATUS}))
+    try {
+      const parameters = url.parse(req.url, true)
+      const {gameId, player} = TokenService.parseToken(parameters.query.token)
+      ws.gameId = gameId
+      ws.player = player
+      ws.playerId = player.playerId
+      addClient(ws)
+      ws.on('message', WebSocketMessageService(broadcast(gameId), ws))
+      ws.on('close', () => ClientService.removeClient(player.playerId))
+      ws.emit('message', JSON.stringify({event: STATUS}))
+    } catch (err) {
+      logger.error(err)
+    }
   })
   
   wss.onUpgrade = (request, socket, head) => {

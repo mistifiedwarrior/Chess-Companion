@@ -6,7 +6,7 @@ const ClientService = {
   },
   
   removeClient(playerId) {
-    this.clients = this.clients.filter((client) => client.playerId !== playerId)
+    // this.clients = this.clients.filter((client) => client.playerId !== playerId)
   }
 }
 

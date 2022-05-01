@@ -22,14 +22,11 @@ gameController.get('/status', (req, res) => {
     .catch((error) => handleError(res, error, customError))
 })
 
-gameController.get('/:gameId/start', (req, res) => {
-  try {
-    const game = GameService.startGame(req.params.gameId, req.player)
-    res.send({game})
-  } catch (error) {
-    const customError = {code: '', message: 'Failed to start game'}
-    handleError(res, error, customError)
-  }
+gameController.get('/possibles/:square', (req, res) => {
+  const customError = {code: '', message: 'Failed to get the possible moves'}
+  GameService.getPossibleMoves(req.gameId, req.player, req.params.square)
+    .then((moves) => res.send(moves))
+    .catch((error) => handleError(res, error, customError))
 })
 
 export default gameController

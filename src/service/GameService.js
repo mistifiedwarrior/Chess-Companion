@@ -26,9 +26,10 @@ const GameService = () => ({
   },
   
   saveGame(updatedGame) {
-    return GameRepository.findOneAndUpdate({gameId: updatedGame.gameId}, updatedGame)
+    return GameRepository.findOneAndUpdate({gameId: updatedGame.gameId}, updatedGame.save())
       .then(logOnSuccess('Successfully save game', {gameId: updatedGame.gameId}))
       .catch(logOnError('', 'Failed to save game', {gameId: updatedGame.gameId}))
+      .then((game) => this.findGame(game.gameId))
   },
   
   getStatus(gameId) {
@@ -41,12 +42,13 @@ const GameService = () => ({
               .catch(() => ({game, player1}))))
   },
   
-  startGame(gameId, playerId) {
+  startGame({gameId, playerId}) {
     return this.findGame(gameId).then((game) => {
       if (game.player1 !== playerId) {
         throw new BadDataException(ChessError.CHESS602)
       }
-      return game.start()
+      game.start()
+      return this.saveGame(game)
     })
   },
   
@@ -76,6 +78,33 @@ const GameService = () => ({
           .then(logOnSuccess('Successfully joined game', {values}))
           .catch(logOnError('', 'Failed to join game', {values}))
       })
+  },
+  getPossibleMoves(gameId, player, square) {
+    return this.findGame(gameId).then((game) => {
+      if (player.color.toLowerCase().startsWith(game.turn)) {
+        return game.chess.moves({square})
+      }
+      return []
+    })
+  },
+  findGameBy(gameId, playerId) {
+    return this.findGame(gameId).then((game) => {
+      if (game.player1 !== playerId && game.player2 !== playerId) {
+        throw new BadDataException(ChessError.CHESS604)
+      }
+      return game
+    })
+  },
+  movePiece({gameId, playerId, player}, payload) {
+    return this.findGameBy(gameId, playerId).then((game) => {
+      if (player.color.toLowerCase().startsWith(game.turn)) {
+        return this.saveGame(game.movePiece(payload))
+          .then(logOnSuccess('Successfully moved piece', {gameId, playerId}))
+          .catch(logOnError('', 'Failed to move piece', {gameId, playerId}))
+      }
+      throw new BadDataException(ChessError.CHESS605)
+    })
+      .then((game) => ({game, prevMove: payload}))
   }
 })
 

@@ -1,6 +1,6 @@
 import {logger} from '../logger/logger.js'
-import {getStatus, startGame} from './events/WSSEvents.js'
-import {START, STATUS} from './events/action.js'
+import {getStatus, movePiece, startGame} from './events/WSSEvents.js'
+import {MOVE, START, STATUS} from './events/action.js'
 
 const formatMessage = (message) => {
   try {
@@ -13,7 +13,6 @@ const formatMessage = (message) => {
 const WebSocketMessageService = (broadcast, ws) => (message) => {
   logger.info({
     message: 'Received new message',
-    data: message,
     searchableFields: {playerId: ws.playerId, gameId: ws.gameId}
   })
   
@@ -24,15 +23,24 @@ const WebSocketMessageService = (broadcast, ws) => (message) => {
     return
   }
   
-  switch (payload.event) {
-    case STATUS:
-      getStatus(ws.gameId, (msg) => broadcast(STATUS, msg))
-      break
-    case START:
-      startGame(ws.gameId, ws.playerId, (msg) => broadcast(START, msg))
-      break
-    default:
-      break
+  const identifiers = {gameId: ws.gameId, playerId: ws.playerId, player: ws.player}
+  
+  try {
+    switch (payload.event) {
+      case STATUS:
+        getStatus(identifiers, (msg) => broadcast(STATUS, msg))
+        break
+      case START:
+        startGame(identifiers, (msg) => broadcast(START, msg))
+        break
+      case MOVE:
+        movePiece(identifiers, payload, (msg) => broadcast(MOVE, msg))
+        break
+      default:
+        break
+    }
+  } catch (err) {
+    logger.error(err)
   }
 }
 
