@@ -9,12 +9,6 @@ app.use(express.json({limit: '1mb'}))
 app.use(cors())
 
 app.use((req, res, next) => {
-  res.setHeader('Cache-control', 'no-cache,no-store,must-revalidate')
-  res.setHeader('Pragma', 'no-cache')
-  next()
-})
-
-app.use((req, res, next) => {
   const {send} = res
   // eslint-disable-next-line func-names
   res.send = function (responseBody) {
