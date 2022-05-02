@@ -6,6 +6,7 @@ const gameSchema = new mongoose.Schema({
   player2: {type: String},
   state: {type: String, trim: true, required: true},
   fen: {type: String, trim: true, required: true},
+  gameState: {type: String, trim: true},
   createdAt: {type: Date, default: new Date()}
 })
 

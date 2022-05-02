@@ -6,6 +6,7 @@ class Game {
   player2
   gameId
   state = "CREATED"
+  gameState = ""
   createdAt = new Date()
   chess
   fen
@@ -34,6 +35,21 @@ class Game {
     return this
   }
   
+  updateGameState() {
+    this.state = this.chess.in_check() ? "CHECK" : "STARTED"
+    if (this.chess.game_over()) {
+      this.state = "END"
+      if (this.chess.in_checkmate())
+        this.gameState = "CHECKMATE"
+      if (this.chess.in_stalemate())
+        this.gameState = "STALEMATE"
+      if (this.chess.insufficient_material())
+        this.gameState = "INSUFFICIENT MATERIAL"
+      if (this.chess.in_draw())
+        this.gameState = "DRAW"
+    }
+  }
+  
   static loadGame(loadGame) {
     const game = new Game()
     game.gameId = loadGame.gameId
@@ -45,6 +61,7 @@ class Game {
     game.createdAt = loadGame.createdAt
     game.board = game.chess.board().map((row, rowNo) => row.map((col, colNo) => col ? col : {square: getSquare(rowNo, colNo)}))
     game.turn = game.chess.turn()
+    game.updateGameState()
     return game
   }
   
