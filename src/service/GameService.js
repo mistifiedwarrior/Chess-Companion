@@ -82,7 +82,7 @@ const GameService = () => ({
   getPossibleMoves(gameId, player, square) {
     return this.findGame(gameId).then((game) => {
       if (player.color.toLowerCase().startsWith(game.turn)) {
-        return game.chess.moves({square})
+        return game.chess.moves({square, verbose: true})
       }
       return []
     })
