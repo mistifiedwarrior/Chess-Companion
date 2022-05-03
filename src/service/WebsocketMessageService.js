@@ -1,6 +1,7 @@
 import {logger} from '../logger/logger.js'
 import {getStatus, movePiece, startGame} from './events/WSSEvents.js'
 import {MOVE, START, STATUS} from './events/action.js'
+import AuditService from './AuditService.js'
 
 const formatMessage = (message) => {
   try {
@@ -11,6 +12,8 @@ const formatMessage = (message) => {
 }
 
 const WebSocketMessageService = (broadcast, ws) => (message) => {
+  AuditService.broadcastLog(broadcast)
+  
   logger.info({
     message: 'Received new message',
     searchableFields: {playerId: ws.playerId, gameId: ws.gameId}

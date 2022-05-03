@@ -1,3 +1,5 @@
 export const STATUS = 'STATUS'
 export const START = 'START'
 export const MOVE = 'MOVE'
+export const END = 'END'
+export const LOG = 'LOG'

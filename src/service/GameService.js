@@ -9,6 +9,7 @@ import {logOnError, logOnSuccess} from '../logger/logger.js'
 
 // eslint-disable-next-line max-lines-per-function
 const GameService = () => ({
+  
   initGame(values) {
     return values.type === 'HOST' ? this.hostGame(values) : this.joinGame(values)
   },
@@ -79,6 +80,7 @@ const GameService = () => ({
           .catch(logOnError('', 'Failed to join game', {values}))
       })
   },
+  
   getPossibleMoves(gameId, player, square) {
     return this.findGame(gameId).then((game) => {
       if (player.color.toLowerCase().startsWith(game.turn)) {
@@ -87,6 +89,7 @@ const GameService = () => ({
       return []
     })
   },
+  
   findGameBy(gameId, playerId) {
     return this.findGame(gameId).then((game) => {
       if (game.player1 !== playerId && game.player2 !== playerId) {
@@ -95,6 +98,7 @@ const GameService = () => ({
       return game
     })
   },
+  
   movePiece({gameId, playerId, player}, payload) {
     return this.findGameBy(gameId, playerId).then((game) => {
       if (player.color.toLowerCase().startsWith(game.turn)) {
@@ -105,7 +109,9 @@ const GameService = () => ({
       throw new BadDataException(ChessError.CHESS605)
     })
       .then((game) => ({game, prevMove: payload}))
+    
   }
+  
 })
 
 export default GameService()

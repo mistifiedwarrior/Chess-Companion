@@ -1,5 +1,7 @@
 import {Chess} from 'chess.js'
 import {getSquare} from "../utils/utils.js";
+import {auditEvents} from "../service/AuditService.js";
+import {END, MOVE, START} from '../service/events/action.js'
 
 class Game {
   player1;
@@ -25,13 +27,19 @@ class Game {
   }
   
   start() {
-    if (this.state === "CREATED")
+    if (this.state === "CREATED") {
       this.state = "STARTED"
+      auditEvents.emit('audit', {gameId: this.gameId, event: START})
+    }
     return this
   }
   
   movePiece(payload) {
-    this.chess.move(payload)
+    const move = this.chess.move(payload)
+    this.updateGameState()
+    if (move) {
+      auditEvents.emit('audit', {gameId: this.gameId, move: payload, event: MOVE})
+    }
     return this
   }
   
@@ -47,6 +55,7 @@ class Game {
         this.gameState = "INSUFFICIENT MATERIAL"
       if (this.chess.in_draw())
         this.gameState = "DRAW"
+      auditEvents.emit('audit', {gameId: this.gameId, event: END})
     }
   }
   
