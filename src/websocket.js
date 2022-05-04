@@ -3,9 +3,9 @@ import * as WebSocket from 'ws'
 import {logger} from './logger/logger.js'
 import WebSocketMessageService from './service/WebsocketMessageService.js'
 import TokenService from './service/TokenService.js'
-import {STATUS} from './service/events/action.js'
 import ClientService from './service/ClientService.js'
-import {IdGenerator, IdType} from "./service/IdGenerator.js";
+import {IdGenerator, IdType} from './service/IdGenerator.js'
+import {LOG} from './service/events/action.js'
 
 const addClient = (ws) => {
   logger.info({message: 'New connection established', gameId: ws.gameId, player: ws.playerId})
@@ -41,7 +41,7 @@ const webSocketController = () => {
       addClient(ws)
       ws.on('message', WebSocketMessageService(broadcast(ws.gameId), ws))
       ws.on('close', () => ClientService.removeClient(ws.playerId))
-      ws.emit('message', JSON.stringify({event: STATUS}))
+      ws.emit('message', JSON.stringify({event: LOG}))
     } catch (err) {
       logger.error(err)
     }

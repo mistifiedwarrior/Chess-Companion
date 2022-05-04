@@ -1,6 +1,6 @@
 import {logger} from '../logger/logger.js'
-import {getStatus, movePiece, startGame} from './events/WSSEvents.js'
-import {MOVE, START, STATUS} from './events/action.js'
+import {getStatus, movePiece, sendLogs, startGame} from './events/WSSEvents.js'
+import {LOG, MOVE, START, STATUS} from './events/action.js'
 import AuditService from './AuditService.js'
 
 const formatMessage = (message) => {
@@ -37,6 +37,9 @@ const WebSocketMessageService = (broadcast, ws) => (message) => {
       break
     case MOVE:
       movePiece(identifiers, payload, (msg) => broadcast(MOVE, msg)).catch()
+      break
+    case LOG:
+      sendLogs(identifiers, (msg) => broadcast(LOG, msg)).catch()
       break
     default:
       break

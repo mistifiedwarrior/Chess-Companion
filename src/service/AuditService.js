@@ -25,7 +25,7 @@ const AuditService = () => ({
   },
   
   updateLog({gameId, event, move}) {
-    GameService.getStatus(gameId)
+    return GameService.getStatus(gameId)
       .then(({game, player1, player2}) => this.findAudit(gameId)
         .then((audit) => {
           const audits = audit.addLog({event, move, game, player1, player2})

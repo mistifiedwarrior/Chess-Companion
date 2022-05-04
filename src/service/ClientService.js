@@ -6,7 +6,9 @@ const ClientService = {
   },
   
   removeClient(playerId) {
-    // this.clients = this.clients.filter((client) => client.playerId !== playerId)
+    const clients = this.clients.filter((client) => client.playerId === playerId)
+    console.log(clients.length, 'removable clients', playerId)
+    this.clients = this.clients.filter((client) => client.playerId !== playerId)
   }
 }
 
