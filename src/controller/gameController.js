@@ -22,6 +22,13 @@ gameController.get('/status', (req, res) => {
     .catch((error) => handleError(res, error, customError))
 })
 
+gameController.get('/status/:gameId', (req, res) => {
+  const customError = {code: '', message: 'Failed to get the game status by gameId'}
+  GameService.getStatus(req.params.gameId)
+    .then(({game, player1, player2}) => res.send({game, player1, player2}))
+    .catch((error) => handleError(res, error, customError))
+})
+
 gameController.get('/possibles/:square', (req, res) => {
   const customError = {code: '', message: 'Failed to get the possible moves'}
   GameService.getPossibleMoves(req.gameId, req.player, req.params.square)

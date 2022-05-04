@@ -5,6 +5,7 @@ import WebSocketMessageService from './service/WebsocketMessageService.js'
 import TokenService from './service/TokenService.js'
 import {STATUS} from './service/events/action.js'
 import ClientService from './service/ClientService.js'
+import {IdGenerator, IdType} from "./service/IdGenerator.js";
 
 const addClient = (ws) => {
   logger.info({message: 'New connection established', gameId: ws.gameId, player: ws.playerId})
@@ -24,16 +25,22 @@ const webSocketController = () => {
     path: '/websockets'
   })
   
-  wss.on('connection', (ws, req) => {
+  wss.on('connection', async (ws, req) => {
     try {
       const parameters = url.parse(req.url, true)
-      const {gameId, player} = TokenService.parseToken(parameters.query.token)
-      ws.gameId = gameId
-      ws.player = player
-      ws.playerId = player.playerId
+      let {gameId} = parameters.query
+      if (gameId && gameId !== 'undefined') {
+        ws.gameId = gameId
+        ws.playerId = await IdGenerator.generate(IdType.user)
+      } else {
+        const {gameId: id, player} = TokenService.parseToken(parameters.query.token)
+        ws.gameId = id
+        ws.player = player
+        ws.playerId = player.playerId
+      }
       addClient(ws)
-      ws.on('message', WebSocketMessageService(broadcast(gameId), ws))
-      ws.on('close', () => ClientService.removeClient(player.playerId))
+      ws.on('message', WebSocketMessageService(broadcast(ws.gameId), ws))
+      ws.on('close', () => ClientService.removeClient(ws.playerId))
       ws.emit('message', JSON.stringify({event: STATUS}))
     } catch (err) {
       logger.error(err)

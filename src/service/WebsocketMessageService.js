@@ -28,22 +28,18 @@ const WebSocketMessageService = (broadcast, ws) => (message) => {
   
   const identifiers = {gameId: ws.gameId, playerId: ws.playerId, player: ws.player}
   
-  try {
-    switch (payload.event) {
-      case STATUS:
-        getStatus(identifiers, (msg) => broadcast(STATUS, msg))
-        break
-      case START:
-        startGame(identifiers, (msg) => broadcast(START, msg))
-        break
-      case MOVE:
-        movePiece(identifiers, payload, (msg) => broadcast(MOVE, msg))
-        break
-      default:
-        break
-    }
-  } catch (err) {
-    logger.error(err)
+  switch (payload.event) {
+    case STATUS:
+      getStatus(identifiers, (msg) => broadcast(STATUS, msg)).catch()
+      break
+    case START:
+      startGame(identifiers, (msg) => broadcast(START, msg)).catch()
+      break
+    case MOVE:
+      movePiece(identifiers, payload, (msg) => broadcast(MOVE, msg)).catch()
+      break
+    default:
+      break
   }
 }
 

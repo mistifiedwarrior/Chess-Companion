@@ -19,7 +19,8 @@ const IdGenerator = {
 
 const IdType = {
   game: {length: 4, name: 'game'},
-  player: {length: 6, name: 'player'}
+  player: {length: 6, name: 'player'},
+  user: {length: 12, name: 'user'}
 }
 
 export {IdType, IdGenerator}
