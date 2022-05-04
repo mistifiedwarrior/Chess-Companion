@@ -17,6 +17,7 @@ const broadcast = (gameId) => (event, message) => {
     .filter((client) => client.gameId === gameId)
     .forEach((client) => client.send(JSON.stringify({event, message})))
   logger.info({message: 'Successfully broadcast message via websocket', searchableFields: {event, gameId}})
+  return message
 }
 
 const webSocketController = () => {

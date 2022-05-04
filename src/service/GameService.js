@@ -58,6 +58,10 @@ const GameService = () => ({
       .then((player) => IdGenerator.generate(IdType.game)
         .then((gameId) => {
           const game = new Game(player.playerId, gameId)
+          if (values.player === 'COMPUTER') {
+            game.addPlayer(`${player.getOpponentColor()}_AI`)
+            game.start()
+          }
           return new GameRepository(game).save()
             .then((savedGame) => [savedGame, player])
         }))

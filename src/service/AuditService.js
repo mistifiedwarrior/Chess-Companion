@@ -26,13 +26,15 @@ const AuditService = () => ({
   
   updateLog({gameId, event, move}) {
     return GameService.getStatus(gameId)
-      .then(({game, player1, player2}) => this.findAudit(gameId)
-        .then((audit) => {
-          const audits = audit.addLog({event, move, game, player1, player2})
-          AuditRepository.findOneAndUpdate({gameId}, {$set: audits})
-            .then(() => setTimeout(this.broadcast, 100, LOG, audits))
-        }))
+      .then(({game, player1, player2}) =>
+        game.state !== 'END' && this.findAudit(gameId)
+          .then((audit) => {
+            const audits = audit.addLog({event, move, game, player1, player2})
+            AuditRepository.findOneAndUpdate({gameId}, {$set: audits})
+              .then(() => setTimeout(this.broadcast, 100, LOG, audits))
+          }))
   },
+  
   broadcastLog(broadcast) {
     this.broadcast = broadcast
   }

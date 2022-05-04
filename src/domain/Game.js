@@ -29,13 +29,14 @@ class Game {
   start() {
     if (this.state === "CREATED") {
       this.state = "STARTED"
-      auditEvents.emit('audit', {gameId: this.gameId, event: START})
+      setTimeout(() => auditEvents.emit('audit', {gameId: this.gameId, event: START}), 2000)
     }
     return this
   }
   
   movePiece(payload) {
     const move = this.chess.move(payload)
+    this.state = this.chess.in_check() ? "CHECK" : "STARTED"
     this.updateGameState()
     if (move) {
       auditEvents.emit('audit', {gameId: this.gameId, move: payload, event: MOVE})
@@ -44,9 +45,7 @@ class Game {
   }
   
   updateGameState() {
-    this.state = this.chess.in_check() ? "CHECK" : "STARTED"
     if (this.chess.game_over()) {
-      this.state = "END"
       if (this.chess.in_checkmate())
         this.gameState = "CHECKMATE"
       if (this.chess.in_stalemate())
@@ -55,7 +54,10 @@ class Game {
         this.gameState = "INSUFFICIENT MATERIAL"
       if (this.chess.in_draw())
         this.gameState = "DRAW"
-      auditEvents.emit('audit', {gameId: this.gameId, event: END})
+      if (this.state !== "END") {
+        auditEvents.emit('audit', {gameId: this.gameId, event: END})
+      }
+      this.state = "END"
     }
   }
   

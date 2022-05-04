@@ -27,7 +27,6 @@ const WebSocketMessageService = (broadcast, ws) => (message) => {
   }
   
   const identifiers = {gameId: ws.gameId, playerId: ws.playerId, player: ws.player}
-  
   switch (payload.event) {
     case STATUS:
       getStatus(identifiers, (msg) => broadcast(STATUS, msg)).catch()
