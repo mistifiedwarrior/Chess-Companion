@@ -29,7 +29,7 @@ class Game {
   start() {
     if (this.state === "CREATED") {
       this.state = "STARTED"
-      setTimeout(() => auditEvents.emit('audit', {gameId: this.gameId, event: START}), 2000)
+      auditEvents.emit('audit', {game: this, event: START})
     }
     return this
   }
@@ -39,7 +39,7 @@ class Game {
     this.state = this.chess.in_check() ? "CHECK" : "STARTED"
     this.updateGameState()
     if (move) {
-      auditEvents.emit('audit', {gameId: this.gameId, move: payload, event: MOVE})
+      auditEvents.emit('audit', {game: this, move: payload, event: MOVE})
     }
     return this
   }
@@ -55,7 +55,7 @@ class Game {
       if (this.chess.in_draw())
         this.gameState = "DRAW"
       if (this.state !== "END") {
-        auditEvents.emit('audit', {gameId: this.gameId, event: END})
+        auditEvents.emit('audit', {game: this, event: END})
       }
       this.state = "END"
     }

@@ -54,7 +54,7 @@ const GameService = () => ({
   },
   
   hostGame(values) {
-    return PlayerService.createPlayer(values.name, values.player === 'COMPUTER' ? 'WHITE' : values.color)
+    return PlayerService.createPlayer(values.name, values.color)
       .then((player) => IdGenerator.generate(IdType.game)
         .then((gameId) => {
           const game = new Game(player.playerId, gameId)
