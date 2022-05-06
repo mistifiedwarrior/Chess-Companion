@@ -1,4 +1,5 @@
 import {END, MOVE, START} from "../service/events/action.js";
+import Games from "./Games.js";
 
 const pieces = {
   p: 'PAWN',
@@ -38,7 +39,9 @@ class Audit {
     return new Audit(audit.gameId, audit.logs)
   }
   
-  addLog({game, event, move, player1, player2}) {
+  async addLog({game, event, move}) {
+    const player1 = await Games.getPlayer(game.player1)
+    const player2 = await Games.getPlayer(game.player2)
     switch (event) {
       case START:
         this.logs = [...this.logs, `Game has started`]
@@ -47,7 +50,7 @@ class Audit {
         this.logs = [...this.logs, `Game has ended with ${game.gameState}. ${getState(game, player1, player2)}`]
         break
       case MOVE:
-        const player = player1.color.toLowerCase().startsWith(move.color) ? player1 : player2
+        const player = player1.isMyTurn(move.color) ? player1 : player2
         this.logs = [...this.logs, `${player.name}(${player.color}) has moved ${pieces[move.piece]} from ${move.from} to ${move.to}.${move.captured ? ` Captured ${pieces[move.captured]}.` : ""}${move.promotion ? ` Promoted to ${pieces[move.promotion]}.` : ""}`]
         break
       default:

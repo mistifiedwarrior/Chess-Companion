@@ -26,7 +26,15 @@ const WebSocketMessageService = (broadcast, ws) => (message) => {
     return
   }
   
-  const identifiers = {gameId: ws.gameId, playerId: ws.playerId, player: ws.player}
+  const identifiers = {
+    game: ws.game,
+    gameId: ws.gameId,
+    playerId: ws.playerId,
+    player: ws.player,
+    player1: ws.player1,
+    player2: ws.player2
+  }
+  
   switch (payload.event) {
     case STATUS:
       getStatus(identifiers, (msg) => broadcast(STATUS, msg)).catch()
@@ -38,7 +46,7 @@ const WebSocketMessageService = (broadcast, ws) => (message) => {
       movePiece(identifiers, payload, (msg) => broadcast(MOVE, msg)).catch()
       break
     case LOG:
-      sendLogs(identifiers, (msg) => broadcast(LOG, msg)).catch()
+      sendLogs(Object.assign(identifiers, payload), (msg) => broadcast(LOG, msg)).catch()
       break
     default:
       break

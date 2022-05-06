@@ -5,6 +5,7 @@ import WebSocketMessageService from './service/WebsocketMessageService.js'
 import TokenService from './service/TokenService.js'
 import ClientService from './service/ClientService.js'
 import {IdGenerator, IdType} from './service/IdGenerator.js'
+import Games from "./domain/Games.js";
 
 const addClient = (ws) => {
   logger.info({message: 'New connection established', gameId: ws.gameId, player: ws.playerId})
@@ -35,9 +36,12 @@ const webSocketController = () => {
       } else {
         const {gameId: id, player} = TokenService.parseToken(parameters.query.token)
         ws.gameId = id
-        ws.player = player
+        ws.player = await Games.getPlayer(player.playerId)
         ws.playerId = player.playerId
       }
+      ws.game = await Games.getGame(ws.gameId)
+      ws.player1 = await Games.getPlayer(ws.game.player1)
+      ws.player2 = ws.game.player2 && await Games.getPlayer(ws.game.player2)
       addClient(ws)
       ws.on('message', WebSocketMessageService(broadcast(ws.gameId), ws))
       ws.on('close', () => ClientService.removeClient(ws.playerId))

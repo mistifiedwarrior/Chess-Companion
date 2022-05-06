@@ -7,13 +7,19 @@ import {logOnError, logOnSuccess} from '../logger/logger.js'
 import AIPlayer from '../domain/AIPlayer.js'
 
 const PlayerService = () => ({
-  createPlayer(name, color) {
+  createPlayer(values, color) {
+    if (values.player === 'COMPUTER') {
+      return new Promise((resolve) => {
+        resolve(new AIPlayer('COMPUTER', color, `${color}_AI`))
+      })
+    }
+    
     return IdGenerator.generate(IdType.player)
-      .then((playerId) => new Player(name, color, playerId))
+      .then((playerId) => new Player(values.name, color, playerId))
       .then((player) => new PlayerRepository(player).save())
       .then((player) => this.findPlayer(player.playerId))
-      .then(logOnSuccess('Successfully created player', {name}))
-      .catch(logOnError('', 'Failed to create player', {name}))
+      .then(logOnSuccess('Successfully created player', {name: values.name}))
+      .catch(logOnError('', 'Failed to create player', {name: values.name}))
   },
   
   getOpponentColor(playerId) {
@@ -23,6 +29,11 @@ const PlayerService = () => ({
   },
   
   findPlayer(playerId) {
+    if (!playerId) {
+      return new Promise((resolve) => {
+        resolve({})
+      })
+    }
     if (playerId.includes('AI')) {
       return new Promise((resolve) => {
         resolve(new AIPlayer('COMPUTER', playerId.split('_')[0], playerId))

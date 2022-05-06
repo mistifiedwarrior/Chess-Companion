@@ -6,6 +6,7 @@ import GameRepository from '../repository/GameRepository.js'
 import {IdGenerator, IdType} from './IdGenerator.js'
 import DataNotFoundException from '../exception/DataNotFoundException.js'
 import {logOnError, logOnSuccess} from '../logger/logger.js'
+import Games from '../domain/Games.js'
 
 // eslint-disable-next-line max-lines-per-function
 const GameService = () => ({
@@ -33,40 +34,40 @@ const GameService = () => ({
       .then((game) => this.findGame(game.gameId))
   },
   
-  getStatus(gameId) {
-    return this.findGame(gameId)
-      .then((game) =>
-        PlayerService.findPlayer(game.player1)
-          .then((player1) =>
-            PlayerService.findPlayer(game.player2)
-              .then((player2) => ({game, player1, player2}))
-              .catch(() => ({game, player1}))))
-  },
-  
-  startGame({gameId, playerId}) {
-    return this.findGame(gameId).then((game) => {
-      if (game.player1 !== playerId) {
-        throw new BadDataException(ChessError.CHESS602)
-      }
-      game.start()
-      return this.saveGame(game)
+  getStatus({game, player1, player2}) {
+    if (!player2) {
+      return Games.getPlayer(game.player2)
+        .then((updatedPlayer2) => ({game, player1, player2: updatedPlayer2}))
+    }
+    return new Promise((resolve) => {
+      resolve({game, player1, player2})
     })
   },
   
+  startGame({game, playerId}) {
+    if (game.player1 !== playerId) {
+      throw new BadDataException(ChessError.CHESS602)
+    }
+    game.start()
+    return this.saveGame(game)
+  },
+  
   hostGame(values) {
-    return PlayerService.createPlayer(values.name, values.color)
+    return PlayerService.createPlayer({name: values.name}, values.color)
       .then((player) => IdGenerator.generate(IdType.game)
-        .then((gameId) => {
-          const game = new Game(player.playerId, gameId)
-          if (values.player === 'COMPUTER') {
-            game.addPlayer(`${player.getOpponentColor()}_AI`)
-            game.start()
-          }
-          return new GameRepository(game).save()
-            .then((savedGame) => [savedGame, player])
-        }))
+        .then((gameId) => new GameRepository(new Game(player.playerId, gameId)).save()
+          .then((savedGame) => [savedGame, player])))
       .then(logOnSuccess('Successfully created game', {values}))
       .catch(logOnError('', 'Failed to create game', {values}))
+      .then(([game, player]) => {
+        if (values.player === 'COMPUTER') {
+          return this.joinGame(Object.assign(values, {name: 'COMPUTER', roomNo: game.gameId}))
+            .then(() => Games.getGame(game.gameId, player.playerId))
+            .then((gameStatus) => this.startGame({game: gameStatus, playerId: player.playerId}))
+            .then((updatedGame) => [updatedGame, player])
+        }
+        return [game, player]
+      })
   },
   
   joinGame(values) {
@@ -76,46 +77,33 @@ const GameService = () => ({
           throw new BadDataException(ChessError.CHESS601)
         }
         return PlayerService.getOpponentColor(game.player1)
-          .then((color) => PlayerService.createPlayer(values.name, color))
-          .then((player) =>
-            this.saveGame(game.addPlayer(player.playerId))
-              .then((updatedGame) => [updatedGame, player]))
+          .then((color) => PlayerService.createPlayer(values, color))
+          .then((player) => {
+            Games.addPlayer2(game.gameId, player.playerId).then()
+            return this.saveGame(game.addPlayer(player.playerId))
+              .then((updatedGame) => [updatedGame, player])
+          })
           .then(logOnSuccess('Successfully joined game', {values}))
           .catch(logOnError('', 'Failed to join game', {values}))
       })
   },
   
-  getPossibleMoves(gameId, player, square) {
-    return this.findGame(gameId).then((game) => {
-      if (player.color.toLowerCase().startsWith(game.turn)) {
-        return game.chess.moves({square, verbose: true})
-      }
-      return []
-    })
+  getPossibleMoves(game, player, square) {
+    if (player.isMyTurn(game.turn)) {
+      return game.chess.moves({square, verbose: true})
+    }
+    return []
   },
   
-  findGameBy(gameId, playerId) {
-    return this.findGame(gameId).then((game) => {
-      if (game.player1 !== playerId && game.player2 !== playerId) {
-        throw new BadDataException(ChessError.CHESS604)
-      }
-      return game
-    })
-  },
-  
-  movePiece({gameId, playerId, player}, payload) {
-    return this.findGameBy(gameId, playerId).then((game) => {
-      if (player.color.toLowerCase().startsWith(game.turn)) {
-        return this.saveGame(game.movePiece(payload))
-          .then(logOnSuccess('Successfully moved piece', {gameId, playerId}))
-          .catch(logOnError('', 'Failed to move piece', {gameId, playerId}))
-      }
-      throw new BadDataException(ChessError.CHESS605)
-    })
-      .then((game) => ({game, prevMove: payload}))
-    
+  movePiece({game, playerId, player}, payload) {
+    if (player.isMyTurn(game.turn)) {
+      return this.saveGame(game.movePiece(payload))
+        .then(logOnSuccess('Successfully moved piece', {gameId: game.gameId, playerId}))
+        .catch(logOnError('', 'Failed to move piece', {gameId: game.gameId, playerId}))
+        .then(() => ({game, prevMove: payload}))
+    }
+    throw new BadDataException(ChessError.CHESS605)
   }
-  
 })
 
 export default GameService()

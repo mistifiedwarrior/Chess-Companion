@@ -3,7 +3,7 @@ import {logOnError, logOnSuccess} from '../logger/logger.js'
 import AuditRepository from '../repository/AuditRepository.js'
 import Audit from '../domain/Audit.js'
 import {LOG} from './events/action.js'
-import PlayerService from './PlayerService.js'
+import Games from '../domain/Games.js'
 
 const AuditService = () => ({
   broadcast: () => ({}),
@@ -25,15 +25,14 @@ const AuditService = () => ({
   },
   
   updateLog({game, event, move}) {
-    return PlayerService.findPlayer(game.player1)
-      .then((player1) => PlayerService.findPlayer(game.player2)
-        .then((player2) =>
-          game.state !== 'END' && this.findAudit(game.gameId)
-            .then((audit) => {
-              const audits = audit.addLog({event, move, game, player1, player2})
-              AuditRepository.findOneAndUpdate({gameId: game.gameId}, {$set: audits})
-                .then(() => setTimeout(this.broadcast, 100, LOG, audits))
-            })))
+    if (game.state !== 'END') {
+      return Games.getAudit(game.gameId)
+        .then((audit) => audit.addLog({event, move, game}))
+        .then((audits) => AuditRepository.findOneAndUpdate({gameId: game.gameId}, {$set: audits})
+          .then(() => this.broadcast(LOG, audits)))
+    }
+    // eslint-disable-next-line no-promise-executor-return,prefer-promise-reject-errors
+    return new Promise((res, reject) => reject(''))
   },
   
   broadcastLog(broadcast) {
@@ -44,7 +43,7 @@ const AuditService = () => ({
 const auditService = AuditService()
 const auditEvents = new EventEmitter()
 
-auditEvents.on('audit', (args) => auditService.updateLog(args))
+auditEvents.on('audit', (args) => auditService.updateLog(args).catch())
 
 export {auditEvents}
 export default auditService

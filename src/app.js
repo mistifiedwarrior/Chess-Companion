@@ -3,6 +3,7 @@ import cors from 'cors'
 import router from './router/index.js'
 import TokenService from './service/TokenService.js'
 import {logger} from './logger/logger.js'
+import Games from './domain/Games.js'
 
 const app = express()
 app.use(express.json({limit: '1mb'}))
@@ -23,11 +24,14 @@ app.get('/', (_req, res) => {
   res.send('You have just arrived at chess companion server')
 })
 
-app.use((req, res, next) => {
+app.use(async (req, res, next) => {
   try {
     const {gameId, player} = TokenService.parseToken(req.headers.authorization)
     req.gameId = gameId
-    req.player = player
+    req.player = await Games.getPlayer(player.playerId)
+    req.game = await Games.getGame(gameId)
+    req.player1 = await Games.getPlayer(req.game.player1)
+    req.player2 = req.game.player2 && await Games.getPlayer(req.game.player2)
   } catch (_error) {
     req.unauthorized = true
   }

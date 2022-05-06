@@ -59,6 +59,9 @@ class Game {
       }
       this.state = "END"
     }
+    this.fen = this.chess.fen()
+    this.board = this.chess.board().map((row, rowNo) => row.map((col, colNo) => col ? col : {square: getSquare(rowNo, colNo)}))
+    this.turn = this.chess.turn()
   }
   
   static loadGame(loadGame) {
@@ -70,6 +73,7 @@ class Game {
     game.fen = loadGame.fen
     game.chess.load(game.fen)
     game.createdAt = loadGame.createdAt
+    game.fen = loadGame.fen
     game.board = game.chess.board().map((row, rowNo) => row.map((col, colNo) => col ? col : {square: getSquare(rowNo, colNo)}))
     game.turn = game.chess.turn()
     game.updateGameState()

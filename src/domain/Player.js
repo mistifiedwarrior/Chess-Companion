@@ -16,6 +16,10 @@ class Player {
     return player
   }
   
+  isMyTurn(turn) {
+    return this.color.toLowerCase().startsWith(turn)
+  }
+  
   getOpponentColor() {
     return this.color === WHITE ? BLACK : WHITE
   }
