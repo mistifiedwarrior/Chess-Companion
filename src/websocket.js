@@ -36,11 +36,11 @@ const webSocketController = () => {
       } else {
         const {gameId: id, player} = TokenService.parseToken(parameters.query.token)
         ws.gameId = id
-        ws.player = await Games.getPlayer(player.playerId)
+        ws.player = player.playerId && await Games.getPlayer(player.playerId)
         ws.playerId = player.playerId
       }
       ws.game = await Games.getGame(ws.gameId)
-      ws.player1 = await Games.getPlayer(ws.game.player1)
+      ws.player1 = ws.game.player1 && await Games.getPlayer(ws.game.player1)
       ws.player2 = ws.game.player2 && await Games.getPlayer(ws.game.player2)
       addClient(ws)
       ws.on('message', WebSocketMessageService(broadcast(ws.gameId), ws))

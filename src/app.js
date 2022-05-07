@@ -32,9 +32,9 @@ app.use(async (req, res, next) => {
   try {
     const {gameId, player} = TokenService.parseToken(req.headers.authorization)
     req.gameId = gameId
-    req.player = await Games.getPlayer(player.playerId)
-    req.game = await Games.getGame(gameId)
-    req.player1 = await Games.getPlayer(req.game.player1)
+    req.player = player.playerId && await Games.getPlayer(player.playerId)
+    req.game = gameId && await Games.getGame(gameId)
+    req.player1 = req.game.player1 && await Games.getPlayer(req.game.player1)
     req.player2 = req.game.player2 && await Games.getPlayer(req.game.player2)
   } catch (_error) {
     req.unauthorized = true

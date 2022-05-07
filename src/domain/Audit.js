@@ -40,8 +40,8 @@ class Audit {
   }
   
   async addLog({game, event, move}) {
-    const player1 = await Games.getPlayer(game.player1)
-    const player2 = await Games.getPlayer(game.player2)
+    const player1 = game.player1 && await Games.getPlayer(game.player1)
+    const player2 = game.player2 && await Games.getPlayer(game.player2)
     switch (event) {
       case START:
         this.logs = [...this.logs, `Game has started`]

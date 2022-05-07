@@ -35,7 +35,7 @@ const GameService = () => ({
   },
   
   getStatus({game, player1, player2}) {
-    if (!player2) {
+    if (!player2 && game.player2) {
       return Games.getPlayer(game.player2)
         .then((updatedPlayer2) => ({game, player1, player2: updatedPlayer2}))
     }
