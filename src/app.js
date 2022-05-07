@@ -6,12 +6,8 @@ import Games from './domain/Games.js'
 import cors from 'cors'
 
 const app = express()
+app.use(cors())
 app.use(express.json({limit: '1mb'}))
-
-app.use(cors({
-  optionsSuccessStatus: 200,
-  methods: "GET, POST"
-}))
 
 app.use((req, res, next) => {
   const {send} = res
