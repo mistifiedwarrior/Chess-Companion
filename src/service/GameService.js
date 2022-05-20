@@ -10,11 +10,11 @@ import Games from '../domain/Games.js'
 
 // eslint-disable-next-line max-lines-per-function
 const GameService = () => ({
-  
+
   initGame(values) {
     return values.type === 'HOST' ? this.hostGame(values) : this.joinGame(values)
   },
-  
+
   findGame(gameId) {
     return GameRepository.findOne({gameId})
       .then((game) => {
@@ -26,14 +26,14 @@ const GameService = () => ({
       .then(logOnSuccess('Successfully find game', {gameId}))
       .catch(logOnError('', 'Failed to find game', {gameId}))
   },
-  
+
   saveGame(updatedGame) {
     return GameRepository.findOneAndUpdate({gameId: updatedGame.gameId}, updatedGame.save())
       .then(logOnSuccess('Successfully save game', {gameId: updatedGame.gameId}))
       .catch(logOnError('', 'Failed to save game', {gameId: updatedGame.gameId}))
       .then((game) => this.findGame(game.gameId))
   },
-  
+
   getStatus({game, player1, player2}) {
     if (!player2 && game.player2) {
       return Games.getPlayer(game.player2)
@@ -43,7 +43,7 @@ const GameService = () => ({
       resolve({game, player1, player2})
     })
   },
-  
+
   startGame({game, playerId}) {
     if (game.player1 !== playerId) {
       throw new BadDataException(ChessError.CHESS602)
@@ -51,7 +51,7 @@ const GameService = () => ({
     game.start()
     return this.saveGame(game)
   },
-  
+
   hostGame(values) {
     return PlayerService.createPlayer({name: values.name}, values.color)
       .then((player) => IdGenerator.generate(IdType.game)
@@ -69,7 +69,7 @@ const GameService = () => ({
         return [game, player]
       })
   },
-  
+
   joinGame(values) {
     return this.findGame(values.roomNo)
       .then((game) => {
@@ -87,14 +87,14 @@ const GameService = () => ({
           .catch(logOnError('', 'Failed to join game', {values}))
       })
   },
-  
+
   getPossibleMoves(game, player, square) {
     if (player.isMyTurn(game.turn)) {
       return game.chess.moves({square, verbose: true})
     }
     return []
   },
-  
+
   movePiece({game, playerId, player}, payload) {
     if (player.isMyTurn(game.turn)) {
       return this.saveGame(game.movePiece(payload))

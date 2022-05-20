@@ -16,29 +16,25 @@ import {
 const WHITE = 'w'
 
 class AIPlayer extends Player {
-  
-  isMyTurn(turn) {
-    return this.color.toLowerCase().startsWith(turn)
-  }
-  
+
   evaluateBoard(chess) {
     const evaluatedScore = chess.board().reduce((score, row, rowNo) => row.reduce((totalScore, piece, colNo) => totalScore + this.getPieceValue(piece, rowNo, colNo), score), 0)
     return this.isMyTurn(chess.turn) ? evaluatedScore : -evaluatedScore
   }
-  
+
   findNextMove(game) {
     const chess = new Chess(game.fen)
     return this.minimaxRoot(chess, 3, true)
   }
-  
+
   // eslint-disable-next-line max-params,max-statements
   minimax(chess, depth, isMax, alpha, beta) {
     if (depth === 0) {
       return -this.evaluateBoard(chess)
     }
-    
+
     const moves = chess.moves({verbose: true})
-    
+
     if (isMax) {
       let bestScore = -9999
       for (const move of moves) {
@@ -68,7 +64,7 @@ class AIPlayer extends Player {
     }
     return bestScore
   }
-  
+
   // eslint-disable-next-line class-methods-use-this,max-statements
   minimaxRoot(chess, depth, isMax) {
     const moves = chess.moves({verbose: true})
@@ -85,17 +81,17 @@ class AIPlayer extends Player {
     }
     return bestMove || moves[0]
   }
-  
+
   // eslint-disable-next-line class-methods-use-this
   getPieceValue(piece, rowNo, colNo) {
     if (piece === null) {
       return 0
     }
-    
+
     const score = this.getAbsoluteValue(piece, piece.color === WHITE, rowNo, colNo)
     return piece.color === WHITE ? score : -score
   }
-  
+
   // eslint-disable-next-line class-methods-use-this,max-params
   getAbsoluteValue(piece, isWhite, rowNo, colNo) {
     if (piece.type === 'p') {

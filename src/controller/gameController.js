@@ -26,13 +26,13 @@ gameController.get('/status', (req, res) => {
 
 gameController.get('/status/:gameId', async (req, res) => {
   const customError = {code: '', message: 'Failed to get the game status by gameId'}
-  
+
   const metaData = {
     game: await Games.getGame(req.params.gameId),
     player1: await Games.getPlayer(this.game.player1),
-    player2: this.game.player2 && await Games.getPlayer(this.game.player2),
+    player2: this.game.player2 && await Games.getPlayer(this.game.player2)
   }
-  
+
   GameService.getStatus(metaData)
     .then(({game, player1, player2}) => res.send({game, player1, player2}))
     .catch((error) => handleError(res, error, customError))

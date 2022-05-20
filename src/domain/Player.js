@@ -7,7 +7,7 @@ class Player {
     this.color = color
     this.playerId = playerId
   }
-  
+
   static load(loadPlayer) {
     const player = new Player()
     player.name = loadPlayer.name
@@ -15,11 +15,11 @@ class Player {
     player.playerId = loadPlayer.playerId
     return player
   }
-  
+
   isMyTurn(turn) {
     return this.color.toLowerCase().startsWith(turn)
   }
-  
+
   getOpponentColor() {
     return this.color === WHITE ? BLACK : WHITE
   }

@@ -2,11 +2,9 @@ import GameService from '../GameService.js'
 import AuditService from '../AuditService.js'
 
 const moveIfAITurn = (callback, movePiece) => ({game, player2, player1}) => {
-  if (player2.playerId.includes('AI')) {
-    if (player2.isMyTurn(game.turn) && game.state !== 'END') {
-      const identifier = {game, playerId: player2.playerId, player: player2, player1, player2}
-      movePiece(identifier, player2.findNextMove(game), callback)
-    }
+  if (game.state !== 'END' && player2.playerId.includes('AI') && player2.isMyTurn(game.turn)) {
+    const identifier = {game, playerId: player2.playerId, player: player2, player1, player2}
+    return movePiece(identifier, player2.findNextMove(game), callback).catch()
   }
 }
 

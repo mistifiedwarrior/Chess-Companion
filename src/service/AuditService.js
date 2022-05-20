@@ -19,22 +19,18 @@ const AuditService = () => ({
       .then(logOnSuccess('Successfully find audit', {gameId}))
       .catch(logOnError('', 'Failed to find audit', {gameId}))
   },
-  
+
   save(audit) {
     return new AuditRepository(audit).save()
   },
-  
+
   updateLog({game, event, move}) {
-    if (game.state !== 'END') {
-      return Games.getAudit(game.gameId)
-        .then((audit) => audit.addLog({event, move, game}))
-        .then((audits) => AuditRepository.findOneAndUpdate({gameId: game.gameId}, {$set: audits})
-          .then(() => this.broadcast(LOG, audits)))
-    }
-    // eslint-disable-next-line no-promise-executor-return,prefer-promise-reject-errors
-    return new Promise((res, reject) => reject(''))
+    return Games.getAudit(game.gameId)
+      .then((audit) => audit.addLog({event, move, game}))
+      .then((audits) => AuditRepository.findOneAndUpdate({gameId: game.gameId}, {$set: audits})
+        .then(() => this.broadcast(LOG, audits)))
   },
-  
+
   broadcastLog(broadcast) {
     this.broadcast = broadcast
   }
