@@ -19,7 +19,7 @@ class AIPlayer extends Player {
 
   evaluateBoard(chess) {
     const evaluatedScore = chess.board().reduce((score, row, rowNo) => row.reduce((totalScore, piece, colNo) => totalScore + this.getPieceValue(piece, rowNo, colNo), score), 0)
-    return this.isMyTurn(chess.turn) ? evaluatedScore : -evaluatedScore
+    return this.isMyTurn(WHITE) ? evaluatedScore : -evaluatedScore
   }
 
   findNextMove(game) {
@@ -30,7 +30,7 @@ class AIPlayer extends Player {
   // eslint-disable-next-line max-params,max-statements
   minimax(chess, depth, isMax, alpha, beta) {
     if (depth === 0) {
-      return -this.evaluateBoard(chess)
+      return this.evaluateBoard(chess)
     }
 
     const moves = chess.moves({verbose: true})
