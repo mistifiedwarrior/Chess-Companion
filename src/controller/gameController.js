@@ -10,7 +10,7 @@ gameController.post('/init-game', (req, res) => {
   const customError = {code: '', message: 'Failed to initialise the game'}
   GameService.initGame(req.body)
     .then(([game, player]) => {
-      const token = TokenService.createToken({gameId: game.gameId, player})
+      const token = TokenService.createToken({gameId: game.gameId, playerId: player.playerId})
       res.send({game, token, player})
     })
     .catch((error) => handleError(res, error, customError))
@@ -27,7 +27,7 @@ gameController.get('/status', (req, res) => {
 gameController.get('/status/:gameId', async (req, res) => {
   const customError = {code: '', message: 'Failed to get the game status by gameId'}
 
-    const game = await Games.getGame(req.params.gameId)
+  const game = await Games.getGame(req.params.gameId)
   const metaData = {
     game,
     player1: await Games.getPlayer(game.player1),
@@ -47,6 +47,17 @@ gameController.get('/possibles/:square', (req, res) => {
     const customError = {code: '', message: 'Failed to get the possible moves'}
     handleError(res, error, customError)
   }
+})
+
+gameController.put('/reset-game', async (req, res) => {
+  const customError = {code: '', message: 'Failed to reset the game'}
+  const game = await Games.getGame(req.body.gameId)
+  if (req.body.password !== 'teamcompanion') {
+    return res.send({status: false})
+  }
+  GameService.resetGame(game)
+    .then(() => res.send({status: true}))
+    .catch((error) => handleError(res, error, customError))
 })
 
 export default gameController

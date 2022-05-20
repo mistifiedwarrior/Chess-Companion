@@ -26,9 +26,9 @@ app.get('/', (_req, res) => {
 
 app.use(async (req, res, next) => {
   try {
-    const {gameId, player} = TokenService.parseToken(req.headers.authorization)
+    const {gameId, playerId} = TokenService.parseToken(req.headers.authorization)
     req.gameId = gameId
-    req.player = player.playerId && await Games.getPlayer(player.playerId)
+    req.player = playerId && await Games.getPlayer(playerId)
     req.game = gameId && await Games.getGame(gameId)
     req.player1 = req.game.player1 && await Games.getPlayer(req.game.player1)
     req.player2 = req.game.player2 && await Games.getPlayer(req.game.player2)

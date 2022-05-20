@@ -103,6 +103,11 @@ const GameService = () => ({
         .then(() => ({game, prevMove: payload}))
     }
     throw new BadDataException(ChessError.CHESS605)
+  },
+  resetGame(game) {
+    return this.saveGame(game.reset())
+      .then(logOnSuccess('Successfully reset game', {gameId: game.gameId}))
+      .catch(logOnError('', 'Failed to reset game', {gameId: game.gameId}))
   }
 })
 

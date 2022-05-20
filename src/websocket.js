@@ -5,7 +5,7 @@ import WebSocketMessageService from './service/WebsocketMessageService.js'
 import TokenService from './service/TokenService.js'
 import ClientService from './service/ClientService.js'
 import {IdGenerator, IdType} from './service/IdGenerator.js'
-import Games from "./domain/Games.js";
+import Games from './domain/Games.js'
 
 const addClient = (ws) => {
   logger.info({message: 'New connection established', gameId: ws.gameId, player: ws.playerId})
@@ -25,7 +25,7 @@ const webSocketController = () => {
     noServer: true,
     path: '/websockets'
   })
-  
+
   wss.on('connection', async (ws, req) => {
     try {
       const parameters = url.parse(req.url, true)
@@ -34,10 +34,10 @@ const webSocketController = () => {
         ws.gameId = gameId
         ws.playerId = await IdGenerator.generate(IdType.user)
       } else {
-        const {gameId: id, player} = TokenService.parseToken(parameters.query.token)
+        const {gameId: id, playerId} = TokenService.parseToken(parameters.query.token)
         ws.gameId = id
-        ws.player = player.playerId && await Games.getPlayer(player.playerId)
-        ws.playerId = player.playerId
+        ws.player = playerId && await Games.getPlayer(playerId)
+        ws.playerId = playerId
       }
       ws.game = await Games.getGame(ws.gameId)
       ws.player1 = ws.game.player1 && await Games.getPlayer(ws.game.player1)
@@ -49,13 +49,13 @@ const webSocketController = () => {
       logger.error(err)
     }
   })
-  
+
   wss.onUpgrade = (request, socket, head) => {
     wss.handleUpgrade(request, socket, head, (websocket) => {
       wss.emit('connection', websocket, request)
     })
   }
-  
+
   return wss
 }
 
