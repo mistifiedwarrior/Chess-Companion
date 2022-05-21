@@ -41,7 +41,7 @@ class Game {
     if (move) {
       auditEvents.emit('audit', {game: this, move: payload, event: MOVE})
     }
-    return this
+    return move
   }
 
   updateGameState() {

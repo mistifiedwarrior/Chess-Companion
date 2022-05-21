@@ -97,10 +97,11 @@ const GameService = () => ({
 
   movePiece({game, playerId, player}, payload) {
     if (player.isMyTurn(game.turn)) {
-      return this.saveGame(game.movePiece(payload))
+      const move = game.movePiece(payload)
+      return this.saveGame(game)
         .then(logOnSuccess('Successfully moved piece', {gameId: game.gameId, playerId}))
         .catch(logOnError('', 'Failed to move piece', {gameId: game.gameId, playerId}))
-        .then(() => ({game, prevMove: payload}))
+        .then(() => ({game, prevMove: move}))
     }
     throw new BadDataException(ChessError.CHESS605)
   },
