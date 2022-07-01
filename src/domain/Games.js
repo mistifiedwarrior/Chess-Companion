@@ -1,19 +1,22 @@
-import GameService from "../service/GameService.js";
-import AIPlayer from "./AIPlayer.js";
-import PlayerService from "../service/PlayerService.js";
-import AuditService from "../service/AuditService.js";
+import GameService from '../service/GameService.js'
+import AIPlayer from './AIPlayer.js'
+import PlayerService from '../service/PlayerService.js'
+import AuditService from '../service/AuditService.js'
+import ChatService from '../service/ChatService.js'
 
 class Games {
-  games;
+  games
   players
   audits
-  
+  chats
+
   constructor() {
     this.games = []
     this.players = []
     this.audits = []
+    this.chats = []
   }
-  
+
   async getAudit(gameId) {
     const audit = this.audits.find((p) => p.gameId === gameId)
     if (!audit) {
@@ -23,7 +26,17 @@ class Games {
     }
     return audit
   }
-  
+
+  async getChat(gameId) {
+    const chat = this.chats.find((p) => p.gameId === gameId)
+    if (!chat) {
+      const newChat = await ChatService.findChats(gameId).catch()
+      this.chats.push(newChat)
+      return newChat
+    }
+    return chat
+  }
+
   async getPlayer(playerId) {
     if (playerId.includes('AI')) {
       return new AIPlayer('COMPUTER', playerId.split('_')[0], playerId)
@@ -36,7 +49,7 @@ class Games {
     }
     return player
   }
-  
+
   async getGame(gameId) {
     const game = this.games.find((gameStatus) => gameStatus.gameId === gameId)
     if (!game || !game.player1 || !game.player2) {
@@ -47,7 +60,7 @@ class Games {
     }
     return game
   }
-  
+
   async addPlayer2(gameId, playerId) {
     const game = await this.getGame(gameId)
     game.addPlayer(playerId)
@@ -55,8 +68,8 @@ class Games {
 }
 
 class Singleton {
-  singleton;
-  
+  singleton
+
   get() {
     if (!this.singleton) {
       this.singleton = new Games()
